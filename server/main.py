@@ -120,7 +120,7 @@ class PaperImage:
     def drawCurrentConditions(self, x, y, w, icon, temp, condition, summary):
         smallIcon = self.res[icon].resize((32, 32))
         self.img.paste(smallIcon, (x,y+2))
-        self.draw.text((x+40, y), "{} and {}°".format(temp, condition), fill=0, font=self.res["mdFont"])
+        self.draw.text((x+40, y), "{}° {}".format(temp, condition), fill=0, font=self.res["mdFont"])
         self.draw.line((x,y+45, x+w,y+45), fill=0, width=1)
 
         newSummary = ""
