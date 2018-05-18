@@ -39,6 +39,7 @@ class PaperImage:
             "mdFont": ImageFont.truetype('helvetica.ttf', size=32),
             "lgFont": ImageFont.truetype('helvetica.ttf', size=72),
             "smBoldFont": ImageFont.truetype('helveticabold.ttf', size=14),
+            "mdBoldFont": ImageFont.truetype('helveticabold.ttf', size=32),
             "lgBoldFont": ImageFont.truetype('helveticabold.ttf', size=72),
         }
 
@@ -146,7 +147,7 @@ class PaperImage:
         self.img.paste(self.res[icon], (x,y))
 
         y += 130
-        self.centerText(x+w/2, y, w, hi, fill=0, font=self.res["mdLtFont"])
+        self.centerText(x+w/2, y, w, hi, fill=0, font=self.res["mdBoldFont"])
         self.centerText(x+w/2, y+45, w, low, fill=0, font=self.res["mdLtFont"])
 
 def main():
