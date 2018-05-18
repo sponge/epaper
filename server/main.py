@@ -35,10 +35,10 @@ class PaperImage:
         # resources
         self.res = {
             "mdLtFont": ImageFont.truetype('helveticalight.ttf', size=32),
-            "smFont": ImageFont.truetype('helvetica.ttf', size=12),
-            "smBoldFont": ImageFont.truetype('helveticabold.ttf', size=12),
+            "smFont": ImageFont.truetype('helvetica.ttf', size=14),
             "mdFont": ImageFont.truetype('helvetica.ttf', size=32),
             "lgFont": ImageFont.truetype('helvetica.ttf', size=72),
+            "smBoldFont": ImageFont.truetype('helveticabold.ttf', size=14),
             "lgBoldFont": ImageFont.truetype('helveticabold.ttf', size=72),
         }
 
@@ -48,16 +48,18 @@ class PaperImage:
     def render(self):
         colGutter = 20
         leftColWidth = 200
-        rightColWidth = self.EPD_WIDTH - leftColWidth - colGutter
+        rightColWidth = self.EPD_WIDTH - leftColWidth - colGutter * 2
         rightColStart = leftColWidth + colGutter
 
         self.draw.rectangle((0, 0, leftColWidth, self.EPD_HEIGHT), fill=0)
         self.drawToday(0, 20, leftColWidth)
         self.drawCalendar(14, 240, leftColWidth)
+        
+        self.drawCurrentConditions(rightColStart, 20, rightColWidth, self.currently.d["icon"], round(self.currently.d["temperature"]), self.currently.d["summary"], self.daily.summary)
 
         currX = rightColStart
         for day in self.daily.data:
-            self.drawForecast(currX, 120, day.d['icon'], day.d['temperatureHigh'], day.d['temperatureLow'])
+            self.drawForecast(currX, 130, 140, day.time, day.d['icon'], round(day.d['temperatureHigh']), round(day.d['temperatureLow']))
             currX += 140
 
         self.img.save('../output.png')
@@ -115,8 +117,37 @@ class PaperImage:
             absPos = (x + pos[0] - sz[0] / 2, pos[1] + y)
             self.draw.text(absPos, t, fill=color, font=self.res[font])
 
-    def drawForecast(self, x, y, icon, hi, low):
+    def drawCurrentConditions(self, x, y, w, icon, temp, condition, summary):
+        smallIcon = self.res[icon].resize((32, 32))
+        self.img.paste(smallIcon, (x,y+2))
+        self.draw.text((x+40, y), "{} and {}°".format(condition, temp), fill=0, font=self.res["mdFont"])
+        self.draw.line((x,y+45, x+w,y+45), fill=0, width=1)
+
+        newSummary = ""
+        currW = 0
+        for word in summary.split(" "):
+            tw = self.res["smFont"].getsize(word+" ")[0]
+            currW += tw
+            if currW >= w:
+                newSummary += "\n"
+                currW = tw
+            newSummary += word+" "
+
+        self.draw.multiline_text((x,y+55), newSummary, fill=0, font=self.res["smFont"])
+        return
+
+    def drawForecast(self, x, y, w, date, icon, hi, low):
+        hi = "{}°".format(hi)
+        low = "{}°".format(low)
+
+        self.centerText(x+w/2, y, w, calendar.day_name[date.weekday()], fill=0, font=self.res["smFont"])
+
+        y += 25
         self.img.paste(self.res[icon], (x,y))
+
+        y += 130
+        self.centerText(x+w/2, y, w, hi, fill=0, font=self.res["mdLtFont"])
+        self.centerText(x+w/2, y+45, w, low, fill=0, font=self.res["mdLtFont"])
 
 def main():
     with open("config.json", "r") as f:
