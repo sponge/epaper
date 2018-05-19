@@ -20,7 +20,6 @@ void setup() {
   Serial.begin(9600);
   delay(100);
 
-  Epd epd;
   HTTPClient http;
 
   //setup wifi and wait
@@ -36,15 +35,6 @@ void setup() {
   Serial.println("");
   Serial.print("WiFi connected. IP address: ");
   Serial.println(WiFi.localIP());
-
-  // setup the epaper lib
-  Serial.print("initing e-paper... ");
-  if (epd.Init() != 0) {
-    Serial.println("e-paper init failed");
-    sleep();
-    return;
-  }
-  Serial.println("done!");
 
   // download latest image
   Serial.println("starting http connection");
@@ -110,6 +100,16 @@ void setup() {
       curr += c;
     }
   }
+
+  // setup the epaper lib
+  Epd epd;
+  Serial.print("initing e-paper... ");
+  if (epd.Init() != 0) {
+    Serial.println("e-paper init failed");
+    sleep();
+    return;
+  }
+  Serial.println("done!");
 
   // display the updated image, free the memory, and sleep
   epd.DisplayFrame(buff);
