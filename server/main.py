@@ -3,6 +3,7 @@ import datetime
 import glob
 import os
 import json
+import hashlib
 
 import forecastio
 from PIL import Image, ImageDraw, ImageFont
@@ -64,17 +65,29 @@ class PaperImage:
             currX += 140
 
         self.img.save('../output.png')
-        with open("../output.bin", "wb") as binFile:
-            buf = [0x00] * int(self.img.width * self.img.height / 8)
 
-            pixels = self.img.load()
-            for y in range(self.img.height):
-                for x in range(self.img.width):
-                      # Set the bits for the column of pixels at the current position.
-                    if pixels[x, y] != 0:
-                        buf[int((x + y * self.img.width) / 8)
-                            ] |= 0x80 >> (x % 8)
-            binFile.write(bytes(buf))
+        buf = [0x00] * int(self.img.width * self.img.height / 8)
+
+        pixels = self.img.load()
+        for y in range(self.img.height):
+            for x in range(self.img.width):
+                # Set the bits for the column of pixels at the current position.
+                if pixels[x, y] != 0:
+                    buf[int((x + y * self.img.width) / 8)] |= 0x80 >> (x % 8)
+        bufBytes = bytes(buf)
+
+        # don't write out the file if the contents are equal
+        try:
+            with open("../output.bin", "rb") as binFile:
+                currHash = hashlib.sha1(binFile.read()).digest()
+                if hashlib.sha1(bufBytes).digest() == currHash:
+                    # new image is equal, don't write it
+                    return
+        except FileNotFoundError:
+            pass
+
+        with open("../output.bin", "wb") as binFile:
+            binFile.write(bufBytes)
 
     def centerText(self, x, y, w, text, fill, font):
         t = str(text)
@@ -160,4 +173,7 @@ def main():
 
 
 if __name__ == '__main__':
+    scriptDir = os.path.dirname(__file__)
+    if scriptDir != '':
+        os.chdir(scriptDir)
     main()
