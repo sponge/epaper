@@ -130,7 +130,7 @@ class PaperImage:
         # iterate through each week and each day of each week now
         currX = x
         currY += lineSpacing
-        for week in self.cal.monthdayscalendar(2018, 5):
+        for week in self.cal.monthdayscalendar(self.date.year, self.date.month):
             for day in week:
                 # just move forward. the calendar list will return 0 for days in another month
                 if day == 0:
